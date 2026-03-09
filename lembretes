@@ -7,8 +7,15 @@ source venv/bin/activate
 
 
 
+
+python StarterCode/manage.py migrate
+
 gerar o mer via html 
 python manage graph_models > models.dot
 
 
  python StarterCode/manage.py runserver
+
+
+
+ vc pode analizar a velocidade das requests usando o silk http://127.0.0.1:8000/silk/requests/

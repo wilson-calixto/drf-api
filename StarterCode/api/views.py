@@ -23,7 +23,8 @@ def product_detail(request, pk):
 
 @api_view(['GET'])
 def order_list(request):
-    orders=Order.objects.all()
+    # orders=Order.objects.all() não otimizado, faz uma query pra cada order 
+    orders=Order.objects.prefetch_related("items__product").all() #otimizado, faz uma query com varias orders de uma vez 
     serializer= OrderSerializer(orders, many=True)
     return Response(serializer.data)
 
