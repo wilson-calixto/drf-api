@@ -1,7 +1,14 @@
-    source venv/bin/activate
+
+
+
+
+source venv/bin/activate
 
 
 
 
 gerar o mer via html 
 python manage graph_models > models.dot
+
+
+ python StarterCode/manage.py runserver
