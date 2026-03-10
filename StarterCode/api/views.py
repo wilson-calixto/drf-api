@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.views import APIView
 
 
 # @api_view(['GET'])
@@ -18,12 +18,27 @@ from rest_framework.permissions import IsAuthenticated
 #     return Response(serializer.data)
 
 
+
+
+# jeito mais eficiente de listar e criar 
+
+class ProductListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class=ProductSerializer
+
+# jeito mais verboso de listar e criar 
 class ProductListAPIView(generics.ListAPIView):
     # queryset = Product.objects.all()
     # busca os dados que tem stock maior que 0
     queryset = Product.objects.filter(stock__gt=0)
     # busca os dados que tem stock menor que 0
     # queryset = Product.objects.exclude(stock__gt=0)
+    serializer_class=ProductSerializer
+
+
+# jeito mais verboso de listar e criar 
+class ProductCreateAPIView(generics.CreateAPIView):
+    model = Product
     serializer_class=ProductSerializer
 
 
@@ -61,12 +76,22 @@ class UserOrderListAPIView(generics.ListAPIView):
 
 
 
-@api_view(['GET'])
-def product_info(request):
-    products = Product.objects.all()
-    serializer = ProductInfoSerializer({
-        'products':products,
-        'count':len(products),
-        'max_price':products.aggregate(max_price=Max('price'))['max_price']
-    })
-    return Response(serializer.data)
+# @api_view(['GET'])
+# def product_info(request):
+#     products = Product.objects.all()
+#     serializer = ProductInfoSerializer({
+#         'products':products,
+#         'count':len(products),
+#         'max_price':products.aggregate(max_price=Max('price'))['max_price']
+#     })
+#     return Response(serializer.data)
+
+class ProductInfoAPIView(APIView):
+    def get(self,request):
+        products = Product.objects.all()
+        serializer = ProductInfoSerializer({
+            'products':products,
+            'count':len(products),
+            'max_price':products.aggregate(max_price=Max('price'))['max_price']
+        })
+        return Response(serializer.data)

@@ -7,18 +7,20 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=Product
         fields=(
-                'id',
-                'name', 
+                 'name', 
                 'description',
                 'price',
                 'stock'
         )
-    def validate(self, value):
-        if(value<=0):
-            raise serializers.ValidationError('Price must be greater than 0')
+ 
     
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                "Price must be greater than 0."
+            )
         return value
-    
+        
 class OrderItemSerializer(serializers.ModelSerializer):
     # essa linha é responsável por trazer os dados do produto relacionado com essa order item
     product=ProductSerializer()

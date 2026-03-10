@@ -14,7 +14,8 @@ gerar o mer via html
 python manage graph_models > models.dot
 
 
- python StarterCode/manage.py runserver
+cd StarterCode
+python manage.py runserver
 
 
 
@@ -25,4 +26,5 @@ segundo superuser: john-doe  pes2012
 
 rodar testes
 
-python StarterCode/manage.py test
+cd StarterCode
+python manage.py test
