@@ -19,3 +19,10 @@ python manage graph_models > models.dot
 
 
  vc pode analizar a velocidade das requests usando o silk http://127.0.0.1:8000/silk/requests/
+
+
+segundo superuser: john-doe  pes2012
+
+rodar testes
+
+python StarterCode/manage.py test

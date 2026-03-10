@@ -6,6 +6,9 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # Keep command behavior consistent when manage.py is called
+    # from outside the StarterCode directory.
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'drf_course.settings')
     try:
         from django.core.management import execute_from_command_line
