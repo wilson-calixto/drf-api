@@ -1,0 +1,10 @@
+
+
+instalar a lib via pip
+    pip install 
+
+
+adicionar a lib na configuração do projeto
+    DEFAULT_SCHEMA_CLASS
+
+adicionar as view drf_spec nas urls

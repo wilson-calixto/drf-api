@@ -1,0 +1,10 @@
+
+
+instalar a lib via pip
+    pip install djangorestframework-simplejwt
+
+
+adicionar a lib na configuração do projeto
+    DEFAULT_AUTHENTICATION_CLASSES
+
+adicionar as view JWT nas urls

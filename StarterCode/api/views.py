@@ -7,8 +7,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.views import APIView
+from api.filters import ProductFilter
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 # @api_view(['GET'])
@@ -25,6 +28,25 @@ from rest_framework.views import APIView
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class=ProductSerializer
+    filterset_class=ProductFilter
+    # search filter, busca a substring em todos os campos de search_fields 
+    filter_backends=[
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+        ]
+    # =name busca a correspondencia exata
+    # ^name busca o que começa com a pesquisa
+
+    search_fields=['=name','description']
+    ordering_fields=['name','price','stock']
+
+    def get_permissions(self):
+        self.permission_classes=[AllowAny]
+        if(self.request.method=='POST'):
+            self.permission_classes=[IsAdminUser]
+            
+        return super().get_permissions()
 
 # jeito mais verboso de listar e criar 
 class ProductListAPIView(generics.ListAPIView):
@@ -48,10 +70,17 @@ class ProductCreateAPIView(generics.CreateAPIView):
 #     serializer= ProductSerializer(products)
 #     return Response(serializer.data)
 
-class ProductDetailAPIView(generics.RetrieveAPIView):
+class ProductDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class=ProductSerializer
-
+    lookup_url_kwarg='product_id'
+    
+    def get_permissions(self):
+        self.permission_classes=[AllowAny]
+        if(self.request.method in ['PUT','PATCH','DELETE']):
+            self.permission_classes=[IsAdminUser]
+            
+        return super().get_permissions()
 
 
 # @api_view(['GET'])
