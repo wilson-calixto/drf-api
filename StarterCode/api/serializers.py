@@ -37,7 +37,42 @@ class OrderItemSerializer(serializers.ModelSerializer):
         # subtotal é um atributo calculado no model 
         fields = ('product','quantity', 'item_subtotal')
      
+
+
+# serializer específico pra criar dados 
+class OrderCreateSerializer(serializers.ModelSerializer):
+    class OrderItemCreateSerializer(serializers.ModelSerializer):  
+        class Meta:
+            model=OrderItem
+            fields=('product','quantity')
+
+
+    order_id=serializers.UUIDField(read_only=True)
+    items=OrderItemCreateSerializer(many=True)
+
+    def create(self, validated_data):
+        # cria a order sem o itens 
+        orderitem_data = validated_data.pop('items')
+        print("orderitem_data",orderitem_data)
+        order = Order.objects.create(**validated_data)
+
+        # cria os order itens e os relaciona com a order 
+        for item in orderitem_data:
+            OrderItem.objects.create(order=order, **item)
+
+        return order
+    class Meta:
+        model=Order
+ 
+        fields = ('order_id','user','status', 'items')
+        # desta forma o campo user só é exibido no get
+        extra_kwargs={
+            'user':{'read_only':True}
+        }
+
 class OrderSerializer(serializers.ModelSerializer):
+    # permite que o id seja ocutado ao criar uma nova order
+    order_id=serializers.UUIDField(read_only=True)
     # faz o relacionamento entre o orderItems e a Order
     items=OrderItemSerializer(many=True, read_only=True)
     total_price=serializers.SerializerMethodField()
