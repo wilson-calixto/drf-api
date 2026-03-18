@@ -41,3 +41,9 @@ Pega O RESULTADO DE UMA KEY
 GET key-completa
 
 
+-----------------------------------------------------------------------
+
+quando vc usa a cache pra diferentes usuários o redis não sabe identificar 
+a cache certa de cada usuario
+
+pra isso use os cabeçalhos vary_on_headers

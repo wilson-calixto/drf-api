@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -130,7 +131,23 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
      ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5
+    'PAGE_SIZE': 5,
+    'DEFAULT_THROTTLE_CLASSES': [
+        # define os THROTTLE de toda a aplicacao
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        # 'rest_framework.throttling.ScopedRateThrottle',
+        # 'rest_framework.throttling.BurstRateThrottle',
+        # 'rest_framework.throttling.SustainedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '2/minute',
+        'products':'2/minute',
+        'order':'2/minute',
+        'user': '1000/day',
+        # 'burst':'10/minute',
+        # 'sustained':'15/hour'
+    }
 }
 
 SPECTACULAR_SETTINGS = {
@@ -150,4 +167,10 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1)
 }

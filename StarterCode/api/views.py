@@ -1,3 +1,4 @@
+from django.views.decorators.vary import vary_on_headers, vary_on_cookie
 from django.shortcuts import render
 from django.db.models import Max
 from django.http import JsonResponse
@@ -20,6 +21,8 @@ from rest_framework.decorators import action
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from rest_framework.throttling import ScopedRateThrottle
+
 
 # @api_view(['GET'])
 # def product_list(request):
@@ -33,6 +36,13 @@ from django.views.decorators.cache import cache_page
 # jeito mais eficiente de listar e criar Product
 
 class ProductListCreateAPIView(generics.ListCreateAPIView):
+
+    # limita a quantidade de request nessa rota
+    throttle_scope='products'
+    throttle_classes=[ScopedRateThrottle]
+
+
+    
     # sempre que usar paginação adicione uma ordenação default
     queryset = Product.objects.order_by('-pk')
     serializer_class=ProductSerializer
@@ -130,6 +140,9 @@ class ProductDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 # crud completo de Order
 class OrderViewSet(viewsets.ModelViewSet):
+    # limita a quantidade de request nessa rota
+    throttle_scope='orders'
+
     queryset = Order.objects.prefetch_related("items__product").all().order_by('-pk')
     serializer_class=OrderSerializer
     # permission_classes=[AllowAny]
@@ -138,6 +151,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     pagination_class=None
     filterset_class=OrderFilter
     filter_backends=[DjangoFilterBackend]
+
+    # Adicionando cache na listagem de orders
+    # o vary_on_headers leva o header em consideração na hora de criar a cache 
+    @method_decorator(cache_page(60*15, key_prefix="order_list"))
+    @method_decorator(vary_on_headers('Authorization'))    
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
 
     # adiciona novos parametros no save do serializer 
     def perform_create(self, serializer):
