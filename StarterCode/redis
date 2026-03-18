@@ -1,0 +1,43 @@
+
+
+
+
+criar o container
+docker run --name django-redis -d -p 6379:6379 --rm redis 
+
+115506dedef67c99762494ad147af15f699d99d5331e944202d52a11b8e82e16
+
+instale o redis no django
+
+pip install "redis[hiredis]"
+pip install django-redis
+
+Adicione os dados de config do redis no settings 
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+ 
+    }
+}
+
+Adicione o decorator as rotas que vc quer cachear 
+    @method_decorator(cache_page(60*15, key_prefix="product_list"))
+
+
+Adicione o signals que invalida cache no arquivo apps
+
+acesse o docker do redis 
+docker exec -ti 115506dedef67c99762494ad147af15f699d99d5331e944202d52a11b8e82e16 bash
+
+conecta ao db 1 
+redis-cli -n 1 
+
+lista as keys 
+KEYS *
+
+Pega O RESULTADO DE UMA KEY 
+GET key-completa
+
+

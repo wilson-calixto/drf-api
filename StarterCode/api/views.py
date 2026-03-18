@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.db.models import Max
 from django.http import JsonResponse
-from api.serializers import ProductSerializer, OrderSerializer,ProductInfoSerializer,OrderCreateSerializer
-from api.models import Product,Order
+from api.serializers import ProductSerializer, OrderSerializer,ProductInfoSerializer,OrderCreateSerializer,UserSerializer
+from api.models import Product,Order,User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -18,7 +18,8 @@ from api.pagination import CustomPagination
 from rest_framework import viewsets
 from rest_framework.decorators import action
 
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 # @api_view(['GET'])
 # def product_list(request):
@@ -50,7 +51,9 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
     ordering_fields=['name','price','stock']
 
     # vc pode sobrescrever o pagination
-    pagination_class= CustomPagination
+    # pagination_class= CustomPagination
+
+    pagination_class=None
 
     # vc pode usar o offset pra scroll infinito pois ele pula a q uanti
     # quantidade de tuplas do offset e retorna a quantidade de tuplas do limit
@@ -58,6 +61,17 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
     # pagination_class= LimitOffsetPagination
 
 
+
+
+    # Adicionando cache na listagem de products
+    @method_decorator(cache_page(60*15, key_prefix="product_list"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        import time
+        time.sleep(2)
+        return super().get_queryset()
 
     def get_permissions(self):
         self.permission_classes=[AllowAny]
@@ -199,3 +213,9 @@ class ProductInfoAPIView(APIView):
             'max_price':products.aggregate(max_price=Max('price'))['max_price']
         })
         return Response(serializer.data)
+
+
+class UserListView(generics.ListAPIView):
+    queryset=User.objects.all()
+    serializer_class=UserSerializer
+    pagination_class=None

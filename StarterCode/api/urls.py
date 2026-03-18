@@ -20,6 +20,7 @@ urlpatterns = [
     # path("orders", views.OrderListAPIView.as_view()),
     # path("user-orders", views.UserOrderListAPIView.as_view(),name='user-orders'),
     
+    path("users/", views.UserListView.as_view()),
 
 ]
 
