@@ -131,7 +131,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     # sobrescrever a classe de serializer dependendo do metodo que esta sendo usado
     def get_serializer_class(self):
-        if(self.action=='create'): # ou self.request.method =='POST'
+        if(self.action in ['create', 'update']): # ou self.request.method =='POST'
             return OrderCreateSerializer
         return super().get_serializer_class()
     

@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 from .models import Product, Order,OrderItem
-
+from django.db import transaction
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=Product
@@ -48,17 +48,40 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
 
     order_id=serializers.UUIDField(read_only=True)
-    items=OrderItemCreateSerializer(many=True)
+    items=OrderItemCreateSerializer(many=True, required=False)
+    
+    def update(self, instace, validated_data):
+        # cria a order sem o itens 
+        orderitem_data = validated_data.pop('items')
+        
+        with transaction.atomic:
+            # atualiza os dados de order 
+            instace = super().update(instace,validated_data)
+
+            if(orderitem_data is not None):
+                # limpando itens atuais
+                instace.items.all().delete()
+
+
+                # cria os order itens e os relaciona com a order 
+                for item in orderitem_data:
+                    OrderItem.objects.create(order=instace, **item)
+
+        return instace
+
+
 
     def create(self, validated_data):
         # cria a order sem o itens 
         orderitem_data = validated_data.pop('items')
         print("orderitem_data",orderitem_data)
-        order = Order.objects.create(**validated_data)
+        with transaction.atomic:
 
-        # cria os order itens e os relaciona com a order 
-        for item in orderitem_data:
-            OrderItem.objects.create(order=order, **item)
+            order = Order.objects.create(**validated_data)
+
+            # cria os order itens e os relaciona com a order 
+            for item in orderitem_data:
+                OrderItem.objects.create(order=order, **item)
 
         return order
     class Meta:
