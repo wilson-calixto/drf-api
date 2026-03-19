@@ -89,13 +89,12 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         # cria a order sem o itens 
         orderitem_data = validated_data.pop('items')
         print("orderitem_data",orderitem_data)
-        with transaction.atomic:
 
-            order = Order.objects.create(**validated_data)
+        order = Order.objects.create(**validated_data)
 
-            # cria os order itens e os relaciona com a order 
-            for item in orderitem_data:
-                OrderItem.objects.create(order=order, **item)
+        # cria os order itens e os relaciona com a order 
+        for item in orderitem_data:
+            OrderItem.objects.create(order=order, **item)
 
         return order
     class Meta:

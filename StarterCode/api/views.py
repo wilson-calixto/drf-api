@@ -22,7 +22,7 @@ from rest_framework.decorators import action
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.throttling import ScopedRateThrottle
-
+from api.tasks import send_order_confirmation_email
 
 # @api_view(['GET'])
 # def product_list(request):
@@ -161,9 +161,12 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
 
-    # adiciona novos parametros no save do serializer 
+    # adiciona novos parametros (user) no save do serializer 
     def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
+        order=serializer.save(user=self.request.user)
+
+        # executa a task asincronamente
+        send_order_confirmation_email.delay(order.order_id, self.request.user.email)
 
     # sobrescrever a classe de serializer dependendo do metodo que esta sendo usado
     def get_serializer_class(self):

@@ -28,3 +28,10 @@ rodar testes
 
 cd StarterCode
 python manage.py test
+
+
+
+
+pra rodar o celery 
+
+celery -A drf_course worker --loglevel=INFO
