@@ -6,6 +6,13 @@ class User(AbstractUser):
     pass
 
 
+class Category(models.Model):
+    name=models.CharField(max_length=100)
+    description=models.TextField()
+    category_id = models.UUIDField(primary_key=True,default=uuid.uuid4)
+
+    
+
 class Product(models.Model):
     name= models.CharField(max_length=200)
     description = models.TextField()
@@ -14,6 +21,12 @@ class Product(models.Model):
     
     image = models.ImageField(upload_to="products/", blank=True, null=True)
     
+    # category = models.ForeignKey(
+    #     Category,
+    #     on_delete=models.CASCADE,
+    #     related_name="products",
+    #     null=False
+    # )
  
     @property
     def in_stock(self):
@@ -46,3 +59,7 @@ class OrderItem(models.Model):
         return self.product.price * self.quantity
     def __str__(self):
         return f"{self.quantity} x {self.product.name} in order {self.order.order_id}"
+    
+
+
+

@@ -8,4 +8,4 @@ def send_order_confirmation_email(order_id,user_email):
 
     subject = 'Order Confirmation'
     message = f'Your order with id {order_id} has been received and is being processed'
-    # return send_mail(subject, message,settings.DEFAULT_FROM_MAIL, [user_email])
+    return send_mail(subject, message,settings.DEFAULT_FROM_MAIL, [user_email])
