@@ -37,12 +37,15 @@ class Servidor(models.Model):
         on_delete=models.PROTECT,
         related_name='servidores'
     )
-
-    cursos = models.ForeignKey(
+    cursos = models.ManyToManyField(
         Curso,
-        related_name="servidores",
-        on_delete=models.PROTECT,
-    )
+        related_name="servidores" )
+
+    # cursos = models.ForeignKey(
+    #     Curso,
+    #     related_name="servidores",
+    #     on_delete=models.PROTECT,
+    # )
 
     def __str__(self):
         return self.nome

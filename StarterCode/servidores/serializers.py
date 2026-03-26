@@ -26,7 +26,7 @@ class ServidorSerializerSlugRelatedField(serializers.ModelSerializer):
         fields='__all__'
 
 
-class CursoSerializerNestedSerializer(serializers.ModelSerializer):
+class CursosSerializerNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model=Curso
         fields=["id","nome"]
@@ -60,6 +60,7 @@ class ServidorWriteSerializer(serializers.ModelSerializer):
 class ServidorReadSerializer(serializers.ModelSerializer):
     cargo=CargoSerializerNestedSerializer()
     lotacao=LotacaoSerializerNestedSerializer()
+    cursos=CursosSerializerNestedSerializer(many=True)
 
 
     class Meta:

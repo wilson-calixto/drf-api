@@ -24,4 +24,4 @@ class LotacaoViewSet(ModelViewSet):
 
 class CursoViewSet(ModelViewSet):
     queryset= Curso.objects.all()
-    serializer_class= CursoSerializerNestedSerializer
+    serializer_class= CursosSerializerNestedSerializer
