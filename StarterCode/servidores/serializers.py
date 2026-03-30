@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import *
-
+from .service import ServidorService
 
 class ServidorSerializerPrimaryKeyRelatedField(serializers.ModelSerializer):
     class Meta:
@@ -56,6 +56,9 @@ class ServidorWriteSerializer(serializers.ModelSerializer):
         model = Servidor
         fields = "__all__"
 
+    def update(self, instance, validated_data):
+        return ServidorService.update(instance,validated_data)
+ 
 
 class ServidorReadSerializer(serializers.ModelSerializer):
     cargo=CargoSerializerNestedSerializer()

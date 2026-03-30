@@ -1,7 +1,7 @@
 from .models import *
 from .serializers import *
 from rest_framework.viewsets import ModelViewSet
-
+from .filters import ServidorFilter
 
 
 class CargoViewSet(ModelViewSet):
@@ -10,6 +10,7 @@ class CargoViewSet(ModelViewSet):
 
 class ServidorViewSet(ModelViewSet):
     queryset = Servidor.objects.all()
+    filterset_class=ServidorFilter
     def get_queryset(self):
         return Servidor.objects.select_related('cargo', 'lotacao').prefetch_related('cursos')
 
