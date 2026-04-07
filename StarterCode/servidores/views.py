@@ -1,7 +1,7 @@
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Avg, Count
-
+from django.db.models import Avg, Count, Sum,Value,Max,Min
+from django.db.models.functions import Coalesce
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
@@ -25,12 +25,27 @@ class CargoViewSet(ModelViewSet):
     @action(
         detail=False,
             methods=['get'],
-            url_path='servidores-por-cargo',
+            url_path='servidores_por_cargo',
      )
     def servidores_por_cargo(self,request):
         cargos=Cargo.objects.annotate(total_servidores=Count("servidores",distinct=True))
         serializer = self.get_serializer(cargos,many=True)
         return Response(serializer.data)
+
+
+    
+    @action(
+        detail=False,
+            methods=['get'],
+            url_path='media_de_carga_horaria_de_cursos_por_cargo',
+     )
+    def media_de_carga_horaria_de_cursos_por_cargo(self,request):
+        cargos=Cargo.objects.annotate(media_de_horas=Avg("servidores__cursos__carga_horaria"))
+        serializer = self.get_serializer(cargos,many=True)
+        return Response(serializer.data)
+
+
+
 
 
 class ServidorViewSet(ModelViewSet):
@@ -106,6 +121,51 @@ class ServidorViewSet(ModelViewSet):
         return Response(serializer.data)
  
 
+    # Total de horas de curso por servidor
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='horas_de_curso_por_servidor',
+     )
+    def horas_de_curso_por_servidor(self,request):
+        # todo fazer funcionar 
+                
+        servidores=Servidor.objects.annotate(total_horas=Sum("cursos__carga_horaria"))
+        serializer = self.get_serializer(servidores,many=True)
+        
+        return Response(serializer.data)
+ 
+    # 
+    # 
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='horas_de_curso_especifico_por_servidor',
+     )
+    def horas_de_curso_especifico_por_servidor(self,request):
+        # todo fazer funcionar 
+                
+        servidores=Servidor.objects.annotate(horas_especificas=Sum("cursos__carga_horaria", filter=Q(cursos__nome__icontains="c2w")))
+        serializer = self.get_serializer(servidores,many=True)
+        
+        return Response(serializer.data)
+ 
+
+
+# Média de horas de curso por servidor
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='media_de_horas_de_curso_por_servidor',
+     )
+    def media_de_horas_de_curso_por_servidor(self,request):
+                 
+        servidores=Servidor.objects.annotate(media_horas=Coalesce(Avg("cursos__carga_horaria"),Value(0)))
+        
+        serializer = self.get_serializer(servidores,many=True)
+        
+        return Response(serializer.data)
+
 
 
     # @action(
@@ -119,7 +179,29 @@ class ServidorViewSet(ModelViewSet):
     #     return Response(servidores)
  
 
- 
+     
+    @action(
+        detail=False,
+            methods=['get'],
+            url_path='maior_carga_horaria_por_servidor',
+     )
+    def maior_carga_horaria_por_servidor(self,request):
+        servidores=Servidor.objects.annotate(maior_curso=Max("cursos__carga_horaria"))
+        serializer = self.get_serializer(servidores,many=True)
+        return Response(serializer.data)
+
+
+    @action(
+        detail=False,
+            methods=['get'],
+            url_path='menor_carga_horaria_por_servidor',
+     )
+    def menor_carga_horaria_por_servidor(self,request):
+        servidores=Servidor.objects.annotate(menor_curso=Min("cursos__carga_horaria"))
+        serializer = self.get_serializer(servidores,many=True)
+        return Response(serializer.data)
+
+
  
 
     def get_serializer_class(self):
@@ -131,12 +213,24 @@ class LotacaoViewSet(ModelViewSet):
     queryset= Lotacao.objects.all()
     serializer_class= LotacaoSerializerNestedSerializer
 
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='max_cursos_por_lotacao',
+     )
+    def max_cursos_por_lotacao(self,request):
+    #     Exemplo 2 — Maior número de cursos em uma lotação
+        lotacao=Lotacao.objects.annotate(max_cursos=Max("servidores__cursos__id"))
+
+        serializer = self.get_serializer(lotacao,many=True)
+        return Response(serializer.data)  
+
+ 
 class CursoViewSet(ModelViewSet):
     queryset= Curso.objects.all()
     serializer_class= CursosSerializerNestedSerializer
 
 
-    # todo fazer funcionar 
     @action(
             detail=False,
             methods=['get'],
