@@ -30,4 +30,6 @@ router.register(r'cargos', CargoViewSet, basename='cargos')
 router.register(r'lotacoes', LotacaoViewSet, basename='lotacoes')
 router.register(r'cursos', CursoViewSet, basename='cursos')
 router.register(r'servidores', ServidorViewSet, basename='servidor')
+router.register(r'materias', MateriaViewSet, basename='materias')
+
 urlpatterns = router.urls

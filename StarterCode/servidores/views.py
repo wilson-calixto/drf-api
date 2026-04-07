@@ -12,6 +12,10 @@ from rest_framework.decorators import action
 from rest_framework import filters
 
 
+class MateriaViewSet(ModelViewSet):
+    queryset=Materia.objects.all()
+    serializer_class= MateriaSerializer
+
 class CargoViewSet(ModelViewSet):
     queryset = Cargo.objects.all()
     serializer_class = CargoSerializerNestedSerializer
@@ -228,8 +232,13 @@ class LotacaoViewSet(ModelViewSet):
  
 class CursoViewSet(ModelViewSet):
     queryset= Curso.objects.all()
-    serializer_class= CursosSerializerNestedSerializer
+ 
+ 
 
+    def get_serializer_class(self):
+        if(self.action in ['list','retrieve'] or  self.request.method =='GET'):
+            return CursosReadSerializerNestedSerializer
+        return CursosWriteSerializerNestedSerializer
 
     @action(
             detail=False,

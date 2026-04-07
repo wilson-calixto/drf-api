@@ -3,6 +3,21 @@ from django.db import models
 # Create your models here.
 from django.db import models
 
+
+class Materia(models.Model):
+    nome=models.CharField(max_length=100)
+ 
+ 
+    
+class Curso(models.Model):
+    nome = models.CharField(max_length=100)
+    carga_horaria = models.IntegerField()
+    materias=models.ManyToManyField(
+        Materia,
+        related_name="cursos"        
+    )
+    def __str__(self):
+        return self.nome
 class Cargo(models.Model):
     nome = models.CharField(max_length=100)
 
@@ -16,13 +31,6 @@ class Lotacao(models.Model):
     def __str__(self):
         return self.nome
 
-
-class Curso(models.Model):
-    nome = models.CharField(max_length=100)
-    carga_horaria = models.IntegerField()
-    
-    def __str__(self):
-        return self.nome
 
 class Servidor(models.Model):
     nome=models.CharField(max_length=100)
@@ -62,3 +70,18 @@ class Perfil(models.Model):
 
 
 
+
+
+
+class Nota(models.Model):
+    valor=models.FloatField()
+    materia=models.ForeignKey(
+        Materia,
+        related_name="notas",
+        on_delete=models.CASCADE
+    )
+    servidor=models.ForeignKey(
+        Servidor,
+        related_name="notas",
+        on_delete=models.CASCADE                
+    )

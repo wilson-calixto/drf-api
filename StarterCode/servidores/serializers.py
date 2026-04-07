@@ -2,6 +2,13 @@ from rest_framework import serializers
 from .models import *
 from .service import ServidorService
 
+
+class MateriaSerializer(serializers.ModelSerializer):
+     
+    class Meta:
+        model = Materia
+        fields = "__all__"
+    
 class ServidorSerializerPrimaryKeyRelatedField(serializers.ModelSerializer):
     class Meta:
         model = Servidor
@@ -26,12 +33,21 @@ class ServidorSerializerSlugRelatedField(serializers.ModelSerializer):
         fields='__all__'
 
 
-class CursosSerializerNestedSerializer(serializers.ModelSerializer):
+
+class CursosReadSerializerNestedSerializer(serializers.ModelSerializer):
+    total_servidores=serializers.IntegerField(read_only=True)
+    materias=MateriaSerializer(many=True)
+
+    class Meta:
+        model=Curso
+        fields=["id","nome","carga_horaria","total_servidores","materias"]
+        
+class CursosWriteSerializerNestedSerializer(serializers.ModelSerializer):
     total_servidores=serializers.IntegerField(read_only=True)
 
     class Meta:
         model=Curso
-        fields=["id","nome","carga_horaria","total_servidores"]
+        fields=["id","nome","carga_horaria","total_servidores","materias"]
         
 class LotacaoSerializerNestedSerializer(serializers.ModelSerializer):
     max_cursos=serializers.FloatField(read_only=True)
@@ -68,7 +84,7 @@ class ServidorWriteSerializer(serializers.ModelSerializer):
 class ServidorReadSerializer(serializers.ModelSerializer):
     cargo=CargoSerializerNestedSerializer()
     lotacao=LotacaoSerializerNestedSerializer()
-    cursos=CursosSerializerNestedSerializer(many=True)
+    cursos=CursosReadSerializerNestedSerializer(many=True)
     total_cursos=serializers.IntegerField(read_only=True)
     media_horas = serializers.FloatField(read_only=True)
     maior_curso= serializers.FloatField(read_only=True)
@@ -76,3 +92,4 @@ class ServidorReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Servidor
         fields = "__all__"        
+
