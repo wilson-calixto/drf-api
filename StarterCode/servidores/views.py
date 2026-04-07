@@ -1,21 +1,129 @@
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg, Count
+
+from rest_framework.response import Response
 from .models import *
 from .serializers import *
 from rest_framework.viewsets import ModelViewSet
 from .filters import ServidorFilter
+from django.db.models import Q
+from rest_framework.decorators import action
+from rest_framework import filters
 
 
 class CargoViewSet(ModelViewSet):
     queryset = Cargo.objects.all()
     serializer_class = CargoSerializerNestedSerializer
+    # responsavel por trazer um campo extra que resume um dado 
+    # contar (COUNT)
+    # somar (SUM)
+    # média (AVG)
+    # máximo/mínimo (MAX, MIN)
+
+    
+    @action(
+        detail=False,
+            methods=['get'],
+            url_path='servidores-por-cargo',
+     )
+    def servidores_por_cargo(self,request):
+        cargos=Cargo.objects.annotate(total_servidores=Count("servidores",distinct=True))
+        serializer = self.get_serializer(cargos,many=True)
+        return Response(serializer.data)
+
 
 class ServidorViewSet(ModelViewSet):
     queryset = Servidor.objects.all()
     filterset_class=ServidorFilter
+    # Busca em todos os campos do modelo
+    filter_backends=[
+        DjangoFilterBackend,#filtro do filterset_class 
+        filters.SearchFilter,#search_fields
+        filters.OrderingFilter,#ordering_fields
+     ]
+    
+    #  search filter
+    search_fields = ["nome", "cargo__nome"]#search_fields
+    ordering_fields = ["nome"]
+
     def get_queryset(self):
         return Servidor.objects.select_related('cargo', 'lotacao').prefetch_related('cursos')
+        # queryset = queryset.filter(cursos__id=1).distinct()
+        
+     
+    # Adiciona uma rota extra à view
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='servidores-lotados-l1',
+     )
+    def servidores_lotados_l1(self,request):
+                
+        servidores=Servidor.objects.select_related('cargo', 'lotacao').prefetch_related('cursos').filter(
+    Q(cargo__nome="c1") | Q(lotacao_id=1)
+)       
+        serializer = self.get_serializer(servidores,many=True)
+        return Response(serializer.data)
+
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='servidores-aggregate',
+     )
+    def servidores_aggregate(self,request):
+                
+        servidores=Servidor.objects.aggregate(total_cursos=Count("id"))
+        print(  'ser',servidores)
+        return Response(servidores)
+        serializer = self.get_serializer(servidores,many=True)
+        return Response(serializer.data)
+
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='servidores-por-lotacao',
+     )
+    def servidores_por_lotacao(self,request):
+                
+        servidores=Servidor.objects.values('lotacao').annotate(total=Count("id"))
+        return Response(servidores)
+ 
+
+ 
+
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='servidores-acima-media-cursos',
+     )
+    def servidores_acima_media_cursos(self,request):
+        media=Servidor.objects.annotate(total_cursos=Count("cursos")).aggregate(media=Avg("total_cursos"))
+        
+        servidores=Servidor.objects.annotate(total_cursos=Count('cursos')).filter(total_cursos__gt=media['media'])
+        serializer = self.get_serializer(servidores,many=True)
+        
+        return Response(serializer.data)
+ 
+
+
+
+    # @action(
+    #         detail=False,
+    #         methods=['get'],
+    #         url_path='servidores-por-cargo',
+    #  )
+    # def servidores_por_cargo(self,request):
+       
+    #     servidores=Servidor.objects.values('cargo').annotate(total=Count("id"))
+    #     return Response(servidores)
+ 
+
+ 
+ 
 
     def get_serializer_class(self):
-        if(self.action in ['list','retrieve']):
+        if(self.action in ['list','retrieve'] or  self.request.method =='GET'):
             return ServidorReadSerializer
         return ServidorWriteSerializer
 
@@ -26,3 +134,19 @@ class LotacaoViewSet(ModelViewSet):
 class CursoViewSet(ModelViewSet):
     queryset= Curso.objects.all()
     serializer_class= CursosSerializerNestedSerializer
+
+
+    # todo fazer funcionar 
+    @action(
+            detail=False,
+            methods=['get'],
+            url_path='servidores_por_cursos',
+     )
+    def servidores_por_curso(self,request):
+       
+        servidores=Curso.objects.annotate(total_servidores=Count("servidores"))
+
+        serializer = self.get_serializer(servidores,many=True)
+        return Response(serializer.data)  
+
+ 

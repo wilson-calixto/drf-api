@@ -37,9 +37,10 @@ class LotacaoSerializerNestedSerializer(serializers.ModelSerializer):
         fields=["id","nome"]
 
 class CargoSerializerNestedSerializer(serializers.ModelSerializer):
+    total_servidores=serializers.IntegerField(read_only=True)
     class Meta:
         model=Cargo
-        fields=["id","nome"]
+        fields=["id","nome","total_servidores"]
 
 class ServidorSerializerNestedSerializer(serializers.ModelSerializer):
     cargo=CargoSerializerNestedSerializer()
@@ -64,7 +65,7 @@ class ServidorReadSerializer(serializers.ModelSerializer):
     cargo=CargoSerializerNestedSerializer()
     lotacao=LotacaoSerializerNestedSerializer()
     cursos=CursosSerializerNestedSerializer(many=True)
-
+    total_cursos=serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Servidor
